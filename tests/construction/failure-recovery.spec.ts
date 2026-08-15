@@ -40,6 +40,14 @@ describe("failure recovery", () => {
     expect(canVerifyVendorJob(job({ status: "In Progress", verified: true }))).toBe(false);
   });
 
+  it("permits verification after completion while verification is pending", () => {
+    expect(canVerifyVendorJob(job({ status: "Completed", verified: false }))).toBe(true);
+  });
+
+  it("does not repeat verification after verification has already been recorded", () => {
+    expect(canVerifyVendorJob(job({ status: "Completed", verified: true }))).toBe(false);
+  });
+
   it("does not permit report approval after a required QA failure", () => {
     expect(canApproveReport({ ...({} as any), status: "Fail" })).toBe(false);
   });
