@@ -35,7 +35,7 @@ export const constructionVendorJob: VendorJob = {
 
 export function canReleaseVendorJob(job: VendorJob): boolean {
   if (job.ownerAuthorizationRequired && !job.ownerAuthorized) return false;
-  return job.status === "Pending Authorization" || job.status === "Authorized";
+  return job.status === "Pending Authorization";
 }
 
 export function canMarkVendorJobComplete(job: VendorJob): boolean {
@@ -43,7 +43,7 @@ export function canMarkVendorJobComplete(job: VendorJob): boolean {
 }
 
 export function canVerifyVendorJob(job: VendorJob): boolean {
-  return job.status === "Completed" && (!job.verificationRequired || job.verified);
+  return job.status === "Completed" && (!job.verificationRequired || !job.verified);
 }
 
 export function needsVendorEscalation(job: VendorJob): boolean {
