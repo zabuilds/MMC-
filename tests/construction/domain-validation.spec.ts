@@ -42,9 +42,12 @@ describe("vendor completion and verification", () => {
     expect(canVerifyVendorJob({ ...baseJob, status: "In Progress", verified: true })).toBe(false);
   });
 
-  it("requires verification for completed work", () => {
-    expect(canVerifyVendorJob({ ...baseJob, status: "Completed", verified: false })).toBe(false);
-    expect(canVerifyVendorJob({ ...baseJob, status: "Completed", verified: true })).toBe(true);
+  it("allows the Completed -> Verified transition when verification is still pending", () => {
+    expect(canVerifyVendorJob({ ...baseJob, status: "Completed", verified: false })).toBe(true);
+  });
+
+  it("does not repeat verification after it has already been recorded", () => {
+    expect(canVerifyVendorJob({ ...baseJob, status: "Completed", verified: true })).toBe(false);
   });
 });
 
