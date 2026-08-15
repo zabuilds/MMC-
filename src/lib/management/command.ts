@@ -2,12 +2,15 @@ import { constructionManagementExceptions, getOpenExceptions, type ManagementExc
 import { constructionCapacity, type CapacitySnapshot } from "./capacity";
 import { constructionQAReview, canApproveReport, type QAReview } from "../qa/visit-review";
 import { constructionReportLifecycle, type ReportLifecycle } from "../reports/report-lifecycle";
+import { constructionAuditEvents, type AuditEvent } from "../audit/timeline";
+import { constructionVendorAuditEvents } from "../audit/vendor-timeline";
 
 export type ManagementCommand = {
   capacity: CapacitySnapshot;
   exceptions: ManagementException[];
   qa: QAReview;
   report: ReportLifecycle;
+  auditEvents: AuditEvent[];
   reportApprovalReady: boolean;
   overallStatus: "Green" | "Yellow" | "Red";
   managementMessage: string;
@@ -37,6 +40,7 @@ export function buildManagementCommand(): ManagementCommand {
     exceptions,
     qa: constructionQAReview,
     report: constructionReportLifecycle,
+    auditEvents: [...constructionAuditEvents, ...constructionVendorAuditEvents],
     reportApprovalReady: canApproveReport(constructionQAReview),
     overallStatus,
     managementMessage,
