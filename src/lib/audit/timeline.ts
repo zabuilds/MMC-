@@ -13,7 +13,19 @@ export type AuditEventType =
   | "communication_delivered"
   | "report_reviewed"
   | "report_approved"
-  | "report_delivered";
+  | "report_delivered"
+  | "vendor_authorized"
+  | "vendor_assigned"
+  | "vendor_scheduled"
+  | "vendor_started"
+  | "vendor_completed"
+  | "vendor_escalated"
+  | "qa_reviewed"
+  | "qa_failed"
+  | "exception_created"
+  | "exception_acknowledged"
+  | "exception_resolved"
+  | "capacity_changed";
 
 export type AuditEvent = {
   id: string;
@@ -43,6 +55,18 @@ export const auditEventLabel: Record<AuditEventType, string> = {
   report_reviewed: "Report reviewed",
   report_approved: "Report approved",
   report_delivered: "Report delivered",
+  vendor_authorized: "Vendor authorized",
+  vendor_assigned: "Vendor assigned",
+  vendor_scheduled: "Vendor scheduled",
+  vendor_started: "Vendor work started",
+  vendor_completed: "Vendor work completed",
+  vendor_escalated: "Vendor coordination escalated",
+  qa_reviewed: "QA review completed",
+  qa_failed: "QA review failed",
+  exception_created: "Management exception created",
+  exception_acknowledged: "Management exception acknowledged",
+  exception_resolved: "Management exception resolved",
+  capacity_changed: "Capacity status changed",
 };
 
 export const constructionAuditEvents: AuditEvent[] = [
