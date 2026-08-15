@@ -2,19 +2,19 @@ import { type AuditEvent } from "./timeline";
 import { constructionVendorJob, type VendorJob } from "../vendors/coordination";
 
 export function buildVendorAuditEvents(job: VendorJob): AuditEvent[] {
-  const events: AuditEvent[] = [];
-
-  events.push({
-    id: `${job.id}-created`,
-    type: "action_created",
-    occurredAt: "Today · 09:25",
-    actor: "Operations",
-    vesselId: job.vesselId,
-    visitId: job.visitId,
-    findingId: job.findingId,
-    actionId: job.id,
-    description: `Vendor coordination created for ${job.title}.`,
-  });
+  const events: AuditEvent[] = [
+    {
+      id: `${job.id}-created`,
+      type: "action_created",
+      occurredAt: "Today · 09:25",
+      actor: "Operations",
+      vesselId: job.vesselId,
+      visitId: job.visitId,
+      findingId: job.findingId,
+      actionId: job.id,
+      description: `Vendor coordination created for ${job.title}.`,
+    },
+  ];
 
   if (job.ownerAuthorizationRequired) {
     events.push({
@@ -33,14 +33,70 @@ export function buildVendorAuditEvents(job: VendorJob): AuditEvent[] {
   if (job.ownerAuthorized) {
     events.push({
       id: `${job.id}-authorized`,
-      type: "decision_recorded",
+      type: "vendor_authorized",
       occurredAt: "Recorded",
       actor: "Owner",
       vesselId: job.vesselId,
       visitId: job.visitId,
       findingId: job.findingId,
       actionId: job.id,
-      description: "Owner authorization recorded.",
+      description: "Owner authorization recorded and vendor work may proceed.",
+    });
+  }
+
+  if (job.status === "Assigned" || job.status === "Scheduled" || job.status === "In Progress" || job.status === "Completed" || job.status === "Verified") {
+    events.push({
+      id: `${job.id}-assigned`,
+      type: "vendor_assigned",
+      occurredAt: "Recorded",
+      actor: "Operations",
+      vesselId: job.vesselId,
+      visitId: job.visitId,
+      findingId: job.findingId,
+      actionId: job.id,
+      description: `${job.vendor} assigned to the vendor job.`,
+    });
+  }
+
+  if (job.status === "Scheduled" || job.status === "In Progress" || job.status === "Completed" || job.status === "Verified") {
+    events.push({
+      id: `${job.id}-scheduled`,
+      type: "vendor_scheduled",
+      occurredAt: "Recorded",
+      actor: "Vendor coordinator",
+      vesselId: job.vesselId,
+      visitId: job.visitId,
+      findingId: job.findingId,
+      actionId: job.id,
+      description: "Vendor work scheduled.",
+    });
+  }
+
+  if (job.status === "In Progress" || job.status === "Completed" || job.status === "Verified") {
+    events.push({
+      id: `${job.id}-started`,
+      type: "vendor_started",
+      occurredAt: "Recorded",
+      actor: job.vendor,
+      vesselId: job.vesselId,
+      visitId: job.visitId,
+      findingId: job.findingId,
+      actionId: job.id,
+      description: "Vendor work started.",
+    });
+  }
+
+  if (job.status === "Completed" || job.status === "Verified") {
+    events.push({
+      id: `${job.id}-completed`,
+      type: "vendor_completed",
+      occurredAt: "Recorded",
+      actor: job.vendor,
+      vesselId: job.vesselId,
+      visitId: job.visitId,
+      findingId: job.findingId,
+      actionId: job.id,
+      description: "Vendor work reported complete.",
     });
   }
 
@@ -75,7 +131,7 @@ export function buildVendorAuditEvents(job: VendorJob): AuditEvent[] {
   if (job.escalationReason) {
     events.push({
       id: `${job.id}-escalated`,
-      type: "action_created",
+      type: "vendor_escalated",
       occurredAt: "Recorded",
       actor: "Operations",
       vesselId: job.vesselId,
