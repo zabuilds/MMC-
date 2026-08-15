@@ -1,4 +1,4 @@
-export type QAReviewStatus = "Pending" | "Pass" | "Pass with Notes" | "Fail";
+export type QAReviewStatus = "Pending" | "Pass" | "Pass With Notes" | "Fail";
 
 export type QAReviewItem = {
   id: string;
@@ -21,7 +21,7 @@ export const constructionQAReview: QAReview = {
   visitId: "visit-001",
   reportId: "report-001",
   reviewer: "QA reviewer",
-  status: "Pass with Notes",
+  status: "Pass With Notes",
   reviewedAt: "Today · 10:05",
   items: [
     { id: "qa-001", label: "Visit is associated with the correct vessel", required: true, passed: true },
