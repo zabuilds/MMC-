@@ -7,6 +7,7 @@ export const packages = [
     priceCents: 22500,
     cadence: "monthly",
     description: "Essential recurring vessel oversight.",
+    featured: false,
   },
   {
     key: "steward",
@@ -22,6 +23,7 @@ export const packages = [
     priceCents: 67500,
     cadence: "monthly",
     description: "Highest-level recurring oversight, readiness, priority support, and deeper coordination.",
+    featured: false,
   },
   {
     key: "private",
@@ -29,5 +31,6 @@ export const packages = [
     priceCents: null,
     cadence: "custom",
     description: "Bespoke support for complex vessels, owners, or operating requirements.",
+    featured: false,
   },
 ] as const;
