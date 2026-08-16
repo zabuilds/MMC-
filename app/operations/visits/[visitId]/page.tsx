@@ -1,4 +1,5 @@
 import { TransitionGuard } from "@/components/operations/TransitionGuard";
+import { FindingTransitionGuard } from "@/components/operations/FindingTransitionGuard";
 
 type Finding = {
   title: string;
@@ -81,6 +82,7 @@ export default function VisitDetailPage() {
                 {finding.action && <div style={{ marginTop: 8, color: "var(--muted)", fontSize: 13 }}>{finding.action}</div>}
               </div>
             ))}
+            <FindingTransitionGuard />
           </article>
 
           <article style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 18, padding: 22 }}>
