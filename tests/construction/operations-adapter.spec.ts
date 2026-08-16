@@ -10,8 +10,10 @@ describe("Operations transition adapter", () => {
     expect(validateOperationsVisitTransition("scheduled", "in_progress").allowed).toBe(true);
   });
 
-  it("keeps completed visits completed until canonical review occurs", () => {
-    expect(validateOperationsVisitTransition("completed", "cancelled").allowed).toBe(false);
+  it("rejects unsupported Operations cancellation", () => {
+    const result = validateOperationsVisitTransition("completed", "cancelled");
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) expect(result.reason).toContain("no canonical transition");
   });
 
   it("maps acknowledged findings to triage", () => {
