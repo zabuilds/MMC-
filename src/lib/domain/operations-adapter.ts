@@ -50,16 +50,21 @@ export function validateOperationsActionTransition(current: OperationsActionStat
   return allowTransition(actionMap[current], actionMap[next], actionTransitions);
 }
 
+/**
+ * An open finding may directly initiate an action. The action itself is the
+ * operational acknowledgement event, so we do not invent a database
+ * acknowledgement state that the findings table cannot persist.
+ */
 export function canCreateActionForFinding(status: OperationsFindingStatus): boolean {
-  return status === "acknowledged";
+  return status === "open" || status === "acknowledged";
 }
 
 export function getFindingActionCreationReason(status: OperationsFindingStatus): string {
-  if (canCreateActionForFinding(status)) {
-    return "Finding is acknowledged and may initiate an operational action.";
-  }
   if (status === "open") {
-    return "A finding must be acknowledged before an operational action can be initiated.";
+    return "Open finding may initiate an operational action; creating the action serves as the operational acknowledgement event.";
+  }
+  if (status === "acknowledged") {
+    return "Acknowledged finding may initiate an operational action.";
   }
   if (status === "actioned") {
     return "This finding is already actioned; use the existing action workflow instead of creating another action here.";
