@@ -10,12 +10,11 @@ export type OperationsVisitStatus = "scheduled" | "assigned" | "in_progress" | "
 export type OperationsFindingStatus = "open" | "acknowledged" | "actioned" | "verified" | "closed";
 export type OperationsActionStatus = "open" | "assigned" | "in_progress" | "blocked" | "completed" | "verified" | "closed";
 
-const visitMap: Record<OperationsVisitStatus, string> = {
+const visitMap: Record<Exclude<OperationsVisitStatus, "cancelled">, string> = {
   scheduled: "Scheduled",
   assigned: "Scheduled",
   in_progress: "Started",
   completed: "Completed",
-  cancelled: "Closed",
 };
 
 const findingMap: Record<OperationsFindingStatus, string> = {
@@ -37,6 +36,9 @@ const actionMap: Record<OperationsActionStatus, string> = {
 };
 
 export function validateOperationsVisitTransition(current: OperationsVisitStatus, next: OperationsVisitStatus): TransitionResult {
+  if (current === "cancelled" || next === "cancelled") {
+    return { allowed: false, reason: "Operations cancellation has no canonical transition" };
+  }
   return allowTransition(visitMap[current], visitMap[next], visitTransitions);
 }
 
