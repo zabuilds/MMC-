@@ -1,3 +1,5 @@
+import { TransitionGuard } from "@/components/operations/TransitionGuard";
+
 type Finding = {
   title: string;
   priority: "Routine" | "Attention" | "Urgent" | "Critical";
@@ -64,6 +66,7 @@ export default function VisitDetailPage() {
               <li>Complete visit</li>
               <li>Prepare report</li>
             </ol>
+            <TransitionGuard />
           </article>
 
           <article style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 18, padding: 22 }}>
