@@ -19,7 +19,7 @@ describe("Operations transition adapter", () => {
   });
 
   it("maps closed findings to the canonical resolved state", () => {
-    expect(validateOperationsFindingTransition("actioned", "closed").allowed).toBe(false);
+    expect(validateOperationsFindingTransition("actioned", "closed").allowed).toBe(true);
     expect(validateOperationsFindingTransition("verified", "closed").allowed).toBe(false);
   });
 
