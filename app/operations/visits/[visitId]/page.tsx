@@ -25,8 +25,7 @@ const findings: Finding[] = [
   {
     title: "Battery compartment requires follow-up",
     priority: "Attention",
-    status: "Acknowledged",
-    action: "Owner decision required",
+    status: "Open",
   },
 ];
 
@@ -99,7 +98,7 @@ export default function VisitDetailPage() {
                       title={getFindingActionCreationReason(findingStatus)}
                       style={{ border: "1px solid var(--line)", background: actionAllowed ? "var(--navy)" : "var(--cream)", color: actionAllowed ? "white" : "var(--muted)", borderRadius: 999, padding: "8px 12px", fontWeight: 800, cursor: actionAllowed ? "pointer" : "not-allowed" }}
                     >
-                      Create action
+                      {actionAllowed ? "Create action" : "Action unavailable"}
                     </button>
                     <span style={{ color: "var(--muted)", fontSize: 12 }}>{getFindingActionCreationReason(findingStatus)}</span>
                   </div>
