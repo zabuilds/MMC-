@@ -49,3 +49,20 @@ export function validateOperationsFindingTransition(current: OperationsFindingSt
 export function validateOperationsActionTransition(current: OperationsActionStatus, next: OperationsActionStatus): TransitionResult {
   return allowTransition(actionMap[current], actionMap[next], actionTransitions);
 }
+
+export function canCreateActionForFinding(status: OperationsFindingStatus): boolean {
+  return status === "acknowledged";
+}
+
+export function getFindingActionCreationReason(status: OperationsFindingStatus): string {
+  if (canCreateActionForFinding(status)) {
+    return "Finding is acknowledged and may initiate an operational action.";
+  }
+  if (status === "open") {
+    return "A finding must be acknowledged before an operational action can be initiated.";
+  }
+  if (status === "actioned") {
+    return "This finding is already actioned; use the existing action workflow instead of creating another action here.";
+  }
+  return "Verified or closed findings cannot initiate new operational actions.";
+}
