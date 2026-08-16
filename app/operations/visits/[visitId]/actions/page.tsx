@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { allowActionTransition } from "../../../../../../src/lib/domain/operations-adapter";
+import { allowActionTransition, canCreateActionForFinding, getFindingActionCreationReason } from "../../../../../../src/lib/domain/operations-adapter";
 
 type Action = {
   title: string;
@@ -12,9 +12,11 @@ type Action = {
 };
 
 const finding = {
+  id: "finding-battery-compartment",
   vessel: "Morning Star",
   title: "Battery compartment requires follow-up",
   priority: "Attention",
+  status: "acknowledged" as const,
   source: "Visit · Today 09:00",
 };
 
@@ -40,6 +42,7 @@ const stateOrder: Action["status"][] = ["Open", "Assigned", "In Progress", "Bloc
 export default function FindingActionsPage() {
   const [actions, setActions] = useState(initialActions);
   const [message, setMessage] = useState<string | null>(null);
+  const [handoffStarted, setHandoffStarted] = useState(false);
 
   const nextStates = useMemo(() => {
     return (status: Action["status"]) => stateOrder.filter((next) => allowActionTransition(status, next).allowed);
@@ -62,6 +65,16 @@ export default function FindingActionsPage() {
     setMessage(`${current} → ${next} validated. Persistence remains intentionally deferred.`);
   }
 
+  function startHandoff() {
+    if (!canCreateActionForFinding(finding.status)) {
+      setMessage(getFindingActionCreationReason(finding.status));
+      return;
+    }
+
+    setHandoffStarted(true);
+    setMessage(`Finding ${finding.id} is now the explicit origin context for this action workflow. Persistence remains intentionally deferred.`);
+  }
+
   return (
     <main style={{ minHeight: "100vh", padding: "32px 24px 64px" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
@@ -70,6 +83,25 @@ export default function FindingActionsPage() {
           <h1 style={{ margin: "8px 0 6px", color: "var(--navy)", fontSize: 40, lineHeight: 1.05 }}>{finding.vessel}</h1>
           <p style={{ margin: 0, color: "var(--muted)" }}>{finding.title} · {finding.priority} · {finding.source}</p>
         </header>
+
+        <section style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 18, padding: 22, marginBottom: 18 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "start", flexWrap: "wrap" }}>
+            <div>
+              <p style={{ margin: 0, color: "var(--gold)", fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase" }}>Origin finding</p>
+              <h2 style={{ margin: "7px 0 5px", color: "var(--navy)", fontSize: 20 }}>{finding.title}</h2>
+              <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>ID: {finding.id} · Status: {finding.status}</p>
+            </div>
+            <button
+              type="button"
+              onClick={startHandoff}
+              disabled={!canCreateActionForFinding(finding.status)}
+              style={{ border: "1px solid var(--line)", background: canCreateActionForFinding(finding.status) ? "var(--navy)" : "var(--soft)", color: canCreateActionForFinding(finding.status) ? "white" : "var(--muted)", borderRadius: 999, padding: "10px 15px", fontWeight: 800, cursor: canCreateActionForFinding(finding.status) ? "pointer" : "not-allowed" }}
+            >
+              {handoffStarted ? "Finding context attached" : "Initiate action from finding"}
+            </button>
+          </div>
+          <p style={{ margin: "14px 0 0", color: "var(--muted)", fontSize: 13, lineHeight: 1.55 }}>{getFindingActionCreationReason(finding.status)}</p>
+        </section>
 
         <section style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 18, padding: 22, marginBottom: 18 }}>
           <h2 style={{ margin: "0 0 18px", color: "var(--navy)", fontSize: 20 }}>Controlled action lifecycle</h2>
