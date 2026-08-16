@@ -23,7 +23,7 @@ const findingMap: Record<OperationsFindingStatus, string> = {
   acknowledged: "Triaged",
   actioned: "Actioned",
   verified: "Verified",
-  closed: "Verified",
+  closed: "Resolved",
 };
 
 const actionMap: Record<OperationsActionStatus, string> = {
