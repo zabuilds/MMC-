@@ -5,10 +5,15 @@ import {
   allowTransition,
   type TransitionResult,
 } from "./transitions";
+import type {
+  ActionState,
+  FindingState,
+  VisitState,
+} from "../../../lib/domain-contracts";
 
-export type OperationsVisitStatus = "scheduled" | "assigned" | "in_progress" | "completed" | "cancelled";
-export type OperationsFindingStatus = "open" | "acknowledged" | "actioned" | "verified" | "closed";
-export type OperationsActionStatus = "open" | "assigned" | "in_progress" | "blocked" | "completed" | "verified" | "closed";
+export type OperationsVisitStatus = VisitState;
+export type OperationsFindingStatus = FindingState;
+export type OperationsActionStatus = ActionState;
 
 const visitMap: Record<Exclude<OperationsVisitStatus, "cancelled">, string> = {
   scheduled: "Scheduled",
