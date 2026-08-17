@@ -31,7 +31,7 @@ const maps = {
 export function buildOperationsTransitionCoverage(): TransitionCoverageRow[] {
   return Object.entries(maps).flatMap(([domain, transitions]) =>
     Object.entries(transitions).flatMap(([current, nextStates]) =>
-      nextStates.map((next) => ({
+      (nextStates as readonly string[]).map((next) => ({
         domain,
         current,
         next,
