@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { allowActionTransition, canCreateActionForFinding, getFindingActionCreationReason } from "../../../../../../src/lib/domain/operations-adapter";
+import { allowActionTransition, canCreateActionForFinding, getFindingActionCreationReason } from "@/src/lib/domain/operations-adapter";
 
 type Action = {
   title: string;
@@ -16,8 +16,6 @@ const finding = {
   vessel: "Morning Star",
   title: "Battery compartment requires follow-up",
   priority: "Attention",
-  // Open is the authoritative persisted source state for the option-1
-  // Finding → Action rule. Creating the action is the acknowledgement event.
   status: "open" as const,
   source: "Visit · Today 09:00",
 };
