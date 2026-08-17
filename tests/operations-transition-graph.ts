@@ -35,12 +35,13 @@ export function checkTransitionGraphIntegrity(): TransitionGraphIssue[] {
 
   for (const [domain, transitions] of Object.entries(maps)) {
     for (const [state, nextStates] of Object.entries(transitions)) {
-      const duplicates = nextStates.filter((next, index) => nextStates.indexOf(next) !== index);
+      const targets = nextStates as readonly string[];
+      const duplicates = targets.filter((next, index) => targets.indexOf(next) !== index);
       if (duplicates.length > 0) {
         issues.push({ domain, state, issue: `Duplicate transition target: ${duplicates[0]}` });
       }
 
-      if (nextStates.includes(state)) {
+      if (targets.includes(state)) {
         issues.push({ domain, state, issue: "Self-transition exists in canonical map" });
       }
     }
