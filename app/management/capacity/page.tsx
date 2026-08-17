@@ -1,6 +1,8 @@
+import { requireRole } from "../../../lib/auth/require-role";
 import { constructionCapacity } from "../../../src/lib/management/capacity";
 
-export default function CapacityPage() {
+export default async function CapacityPage() {
+  await requireRole(["manager_qa", "administrator"]);
   const metrics = [
     ["Active clients", constructionCapacity.activeClients],
     ["Active vessels", constructionCapacity.activeVessels],
