@@ -1,6 +1,8 @@
+import { requireRole } from "../../lib/auth/require-role";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 export default async function OperationsPage() {
+  await requireRole(["operator", "manager_qa", "administrator"]);
   const supabase = await createSupabaseServerClient();
 
   const [visitsResult, findingsResult, actionsResult, reportsResult] = await Promise.all([
