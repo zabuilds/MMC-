@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { allowActionTransition, canCreateActionForFinding, getFindingActionCreationReason } from "@/src/lib/domain/operations-adapter";
+import { validateOperationsActionTransition, canCreateActionForFinding, getFindingActionCreationReason } from "@/src/lib/domain/operations-adapter";
 
 type Action = {
   title: string;
@@ -39,29 +39,35 @@ const initialActions: Action[] = [
 
 const stateOrder: Action["status"][] = ["Open", "Assigned", "In Progress", "Blocked", "Completed", "Verified", "Closed"];
 
+const actionStatusMap: Record<Action["status"], "open" | "assigned" | "in_progress" | "blocked" | "completed" | "verified" | "closed"> = {
+  Open: "open",
+  Assigned: "assigned",
+  "In Progress": "in_progress",
+  Blocked: "blocked",
+  Completed: "completed",
+  Verified: "verified",
+  Closed: "closed",
+};
+
 export default function FindingActionsPage() {
   const [actions, setActions] = useState(initialActions);
   const [message, setMessage] = useState<string | null>(null);
   const [handoffStarted, setHandoffStarted] = useState(false);
 
   const nextStates = useMemo(() => {
-    return (status: Action["status"]) => stateOrder.filter((next) => allowActionTransition(status, next).allowed);
+    return (status: Action["status"]) => stateOrder.filter((next) => validateOperationsActionTransition(actionStatusMap[status], actionStatusMap[next]).allowed);
   }, []);
 
   function transitionAction(index: number, next: Action["status"]) {
     const current = actions[index].status;
-    const result = allowActionTransition(current, next);
+    const result = validateOperationsActionTransition(actionStatusMap[current], actionStatusMap[next]);
 
     if (!result.allowed) {
       setMessage(result.reason);
       return;
     }
 
-    setActions((currentActions) =>
-      currentActions.map((action, actionIndex) =>
-        actionIndex === index ? { ...action, status: next } : action,
-      ),
-    );
+    setActions((currentActions) => currentActions.map((action, actionIndex) => actionIndex === index ? { ...action, status: next } : action));
     setMessage(`${current} → ${next} validated. Persistence remains intentionally deferred.`);
   }
 
@@ -91,12 +97,7 @@ export default function FindingActionsPage() {
               <h2 style={{ margin: "7px 0 5px", color: "var(--navy)", fontSize: 20 }}>{finding.title}</h2>
               <p style={{ margin: 0, color: "var(--muted)", fontSize: 13 }}>ID: {finding.id} · Status: {finding.status}</p>
             </div>
-            <button
-              type="button"
-              onClick={startHandoff}
-              disabled={!canCreateActionForFinding(finding.status)}
-              style={{ border: "1px solid var(--line)", background: canCreateActionForFinding(finding.status) ? "var(--navy)" : "var(--soft)", color: canCreateActionForFinding(finding.status) ? "white" : "var(--muted)", borderRadius: 999, padding: "10px 15px", fontWeight: 800, cursor: canCreateActionForFinding(finding.status) ? "pointer" : "not-allowed" }}
-            >
+            <button type="button" onClick={startHandoff} disabled={!canCreateActionForFinding(finding.status)} style={{ border: "1px solid var(--line)", background: canCreateActionForFinding(finding.status) ? "var(--navy)" : "var(--soft)", color: canCreateActionForFinding(finding.status) ? "white" : "var(--muted)", borderRadius: 999, padding: "10px 15px", fontWeight: 800, cursor: canCreateActionForFinding(finding.status) ? "pointer" : "not-allowed" }}>
               {handoffStarted ? "Finding context attached" : "Initiate action from finding"}
             </button>
           </div>
@@ -116,11 +117,7 @@ export default function FindingActionsPage() {
           <p style={{ margin: "18px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>Completed means the work is reported as done. Verified requires sufficient evidence that the required outcome occurred. Closed means no further operational attention is required.</p>
         </section>
 
-        {message && (
-          <div role="status" style={{ marginBottom: 18, padding: 14, borderRadius: 14, background: "var(--cream)", color: "var(--navy)", fontSize: 14, lineHeight: 1.5 }}>
-            {message}
-          </div>
-        )}
+        {message && <div role="status" style={{ marginBottom: 18, padding: 14, borderRadius: 14, background: "var(--cream)", color: "var(--navy)", fontSize: 14, lineHeight: 1.5 }}>{message}</div>}
 
         <section style={{ display: "grid", gap: 14 }}>
           {actions.map((action, index) => (
@@ -140,12 +137,7 @@ export default function FindingActionsPage() {
 
               <div style={{ marginTop: 18, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {nextStates(action.status).map((next) => (
-                  <button
-                    key={next}
-                    type="button"
-                    onClick={() => transitionAction(index, next)}
-                    style={{ border: "1px solid var(--line)", background: "var(--white)", color: "var(--navy)", borderRadius: 999, padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}
-                  >
+                  <button key={next} type="button" onClick={() => transitionAction(index, next)} style={{ border: "1px solid var(--line)", background: "var(--white)", color: "var(--navy)", borderRadius: 999, padding: "8px 12px", fontWeight: 700, cursor: "pointer" }}>
                     Move to {next}
                   </button>
                 ))}
