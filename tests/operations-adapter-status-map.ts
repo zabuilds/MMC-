@@ -5,10 +5,10 @@ import type {
 } from "../src/lib/domain/operations-adapter";
 
 /**
- * Explicit application-to-canonical vocabulary contract.
+ * Application-to-canonical vocabulary contract.
  *
- * These mappings are intentionally kept separate from database persistence
- * mappings so that a UI label cannot silently become a database state.
+ * This is intentionally separate from persistence mappings: UI vocabulary
+ * must not silently become a new database state.
  */
 export const operationsAdapterStatusContract = {
   visit: {
@@ -39,7 +39,7 @@ export const operationsAdapterStatusContract = {
 export const adapterVocabularyDecisions = {
   visitAssigned: "Application alias for Scheduled; not a distinct canonical transition.",
   visitCancelled: "Explicitly unsupported until canonical cancellation exists.",
-  findingAcknowledged: "Application vocabulary maps to canonical Triaged; action creation from Open is the acknowledgement event.",
-  findingClosed: "Application vocabulary maps to canonical Resolved; Verified -> Closed remains blocked pending business decision.",
-  actionStates: "Application action states map one-to-one to canonical action states.",
+  findingAcknowledged: "Application vocabulary maps to Triaged; creating an action from Open is the acknowledgement event.",
+  findingClosed: "Application vocabulary maps to Resolved; Verified -> Closed remains blocked pending business decision.",
+  actionStates: "Application action states map directly to canonical action states.",
 } as const;
