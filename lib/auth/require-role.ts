@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Role } from "@/lib/domain-contracts";
+
+export type Role = "operator" | "manager_qa" | "client" | "administrator";
 
 const databaseRoleToApplicationRole: Record<string, Role> = {
   operator: "operator",
