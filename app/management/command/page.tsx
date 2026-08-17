@@ -1,6 +1,8 @@
+import { requireRole } from "../../../lib/auth/require-role";
 import { constructionManagementCommand as command } from "../../../src/lib/management/command";
 
-export default function ManagementCommandPage() {
+export default async function ManagementCommandPage() {
+  await requireRole(["manager_qa", "administrator"]);
   return (
     <main style={{ minHeight: "100vh", padding: "32px 24px 64px" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
