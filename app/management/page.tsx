@@ -1,8 +1,10 @@
+import { requireRole } from "../../lib/auth/require-role";
 import { constructionManagementExceptions, getOpenExceptions } from "../../src/lib/management/exceptions";
 
 const openExceptions = getOpenExceptions(constructionManagementExceptions);
 
-export default function ManagementPage() {
+export default async function ManagementPage() {
+  await requireRole(["manager_qa", "administrator"]);
   const critical = openExceptions.filter((item) => item.severity === "Critical").length;
   const urgent = openExceptions.filter((item) => item.severity === "Urgent").length;
   const attention = openExceptions.filter((item) => item.severity === "Attention").length;
