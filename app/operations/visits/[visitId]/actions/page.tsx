@@ -16,7 +16,9 @@ const finding = {
   vessel: "Morning Star",
   title: "Battery compartment requires follow-up",
   priority: "Attention",
-  status: "acknowledged" as const,
+  // Open is the authoritative persisted source state for the option-1
+  // Finding → Action rule. Creating the action is the acknowledgement event.
+  status: "open" as const,
   source: "Visit · Today 09:00",
 };
 
