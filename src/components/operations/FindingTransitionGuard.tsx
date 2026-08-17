@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { validateOperationsFindingTransition, type OperationsFindingStatus } from "@/lib/domain/operations-adapter";
+import { validateOperationsFindingTransition, type OperationsFindingStatus } from "@/src/lib/domain/operations-adapter";
 
 const statuses: OperationsFindingStatus[] = ["open", "acknowledged", "actioned", "verified", "closed"];
 
