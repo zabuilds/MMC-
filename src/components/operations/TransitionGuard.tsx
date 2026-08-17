@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { validateOperationsVisitTransition, type OperationsVisitStatus } from "@/lib/domain/operations-adapter";
+import { validateOperationsVisitTransition, type OperationsVisitStatus } from "@/src/lib/domain/operations-adapter";
 
 const statuses: OperationsVisitStatus[] = ["scheduled", "assigned", "in_progress", "completed", "cancelled"];
 
