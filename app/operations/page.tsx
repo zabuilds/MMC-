@@ -3,13 +3,14 @@ import { createSupabaseServerClient } from "../../lib/supabase/server";
 export default async function OperationsPage() {
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: visits, error: visitsError }, { data: findings, error: findingsError }, { data: actions, error: actionsError }] = await Promise.all([
+  const [visitsResult, findingsResult, actionsResult, reportsResult] = await Promise.all([
     supabase.from("visits").select("id, vessel_id, scheduled_at, status, summary, vessels(name)").order("scheduled_at", { ascending: true }).limit(20),
     supabase.from("findings").select("id, vessel_id, title, priority, status, vessels(name)").order("created_at", { ascending: false }).limit(20),
     supabase.from("actions").select("id, vessel_id, title, status, due_at, vessels(name)").order("due_at", { ascending: true }).limit(20),
+    supabase.from("reports").select("id, status").limit(50),
   ]);
 
-  const error = visitsError ?? findingsError ?? actionsError;
+  const error = visitsResult.error ?? findingsResult.error ?? actionsResult.error ?? reportsResult.error;
 
   if (error) {
     return (
@@ -18,35 +19,46 @@ export default async function OperationsPage() {
           <p style={{ margin: 0, color: "var(--gold)", fontSize: 12, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase" }}>Meridian Marine Co.</p>
           <h1 style={{ margin: "8px 0 6px", color: "var(--navy)", fontSize: 42, lineHeight: 1.05 }}>Operations</h1>
           <p style={{ color: "var(--muted)" }}>The live operations data path is unavailable.</p>
-          <div style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 16, padding: 20, color: "var(--muted)" }}>
-            {error.message}
-          </div>
+          <div style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 16, padding: 20, color: "var(--muted)" }}>{error.message}</div>
         </div>
       </main>
     );
   }
 
-  const openFindings = (findings ?? []).filter((finding) => !["resolved", "closed"].includes(finding.status)).length;
-  const overdueActions = (actions ?? []).filter((action) => action.due_at && new Date(action.due_at).getTime() < Date.now() && !["completed", "verified", "closed"].includes(action.status)).length;
-  const pendingReports = 0;
+  const visits = visitsResult.data ?? [];
+  const findings = findingsResult.data ?? [];
+  const actions = actionsResult.data ?? [];
+  const reports = reportsResult.data ?? [];
+
+  const openFindings = findings.filter((finding) => !["resolved", "closed"].includes(finding.status)).length;
+  const overdueActions = actions.filter((action) => action.due_at && new Date(action.due_at).getTime() < Date.now() && !["completed", "verified", "closed"].includes(action.status)).length;
+  const pendingReports = reports.filter((report) => !["sent", "approved", "closed"].includes(report.status)).length;
+  const today = new Date().toDateString();
+  const todayVisits = visits.filter((visit) => visit.scheduled_at && new Date(visit.scheduled_at).toDateString() === today).length;
 
   const queue = [
-    ...(visits ?? []).slice(0, 4).map((visit) => ({
+    ...visits.slice(0, 4).map((visit) => ({
       title: (visit.vessels as { name?: string } | null)?.name ?? "Unnamed vessel",
       detail: visit.scheduled_at ? `Visit · ${new Date(visit.scheduled_at).toLocaleString()}` : "Visit scheduled",
       status: visit.status,
       tone: "normal",
     })),
-    ...(findings ?? []).filter((finding) => !["resolved", "closed"].includes(finding.status)).slice(0, 2).map((finding) => ({
+    ...findings.filter((finding) => !["resolved", "closed"].includes(finding.status)).slice(0, 2).map((finding) => ({
       title: (finding.vessels as { name?: string } | null)?.name ?? "Unnamed vessel",
       detail: `Finding · ${finding.title}`,
       status: finding.priority,
       tone: finding.priority === "critical" ? "critical" : "urgent",
     })),
-  ];
+    ...actions.filter((action) => action.due_at && new Date(action.due_at).getTime() < Date.now() && !["completed", "verified", "closed"].includes(action.status)).slice(0, 2).map((action) => ({
+      title: (action.vessels as { name?: string } | null)?.name ?? "Unnamed vessel",
+      detail: `Action overdue · ${action.title}`,
+      status: action.status,
+      tone: "critical",
+    })),
+  ].slice(0, 6);
 
   const stats = [
-    ["Today's visits", String((visits ?? []).filter((visit) => visit.scheduled_at && new Date(visit.scheduled_at).toDateString() === new Date().toDateString()).length)],
+    ["Today's visits", String(todayVisits)],
     ["Open findings", String(openFindings)],
     ["Overdue actions", String(overdueActions)],
     ["Reports pending", String(pendingReports)],
