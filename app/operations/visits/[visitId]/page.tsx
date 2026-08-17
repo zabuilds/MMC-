@@ -1,6 +1,6 @@
-import { TransitionGuard } from "@/components/operations/TransitionGuard";
-import { FindingTransitionGuard } from "@/components/operations/FindingTransitionGuard";
-import { canCreateActionForFinding, getFindingActionCreationReason } from "@/lib/domain/operations-adapter";
+import { TransitionGuard } from "@/src/components/operations/TransitionGuard";
+import { FindingTransitionGuard } from "@/src/components/operations/FindingTransitionGuard";
+import { canCreateActionForFinding, getFindingActionCreationReason } from "@/src/lib/domain/operations-adapter";
 
 type Finding = {
   title: string;
