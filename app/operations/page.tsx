@@ -1,18 +1,57 @@
-const queue = [
-  { title: "Morning Star", detail: "Visit today · 09:00", status: "Scheduled", tone: "normal" },
-  { title: "Sea Glass", detail: "Urgent finding · Awaiting vendor", status: "Urgent", tone: "urgent" },
-  { title: "Blue Meridian", detail: "Report awaiting QA", status: "Report QA", tone: "normal" },
-  { title: "Island Runner", detail: "Action overdue · Owner approval", status: "Attention", tone: "critical" },
-];
+import { createSupabaseServerClient } from "../../lib/supabase/server";
 
-const stats = [
-  ["Today's visits", "4"],
-  ["Open findings", "7"],
-  ["Overdue actions", "2"],
-  ["Reports pending", "3"],
-];
+export default async function OperationsPage() {
+  const supabase = await createSupabaseServerClient();
 
-export default function OperationsPage() {
+  const [{ data: visits, error: visitsError }, { data: findings, error: findingsError }, { data: actions, error: actionsError }] = await Promise.all([
+    supabase.from("visits").select("id, vessel_id, scheduled_at, status, summary, vessels(name)").order("scheduled_at", { ascending: true }).limit(20),
+    supabase.from("findings").select("id, vessel_id, title, priority, status, vessels(name)").order("created_at", { ascending: false }).limit(20),
+    supabase.from("actions").select("id, vessel_id, title, status, due_at, vessels(name)").order("due_at", { ascending: true }).limit(20),
+  ]);
+
+  const error = visitsError ?? findingsError ?? actionsError;
+
+  if (error) {
+    return (
+      <main style={{ minHeight: "100vh", padding: "32px 24px 64px" }}>
+        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+          <p style={{ margin: 0, color: "var(--gold)", fontSize: 12, fontWeight: 800, letterSpacing: "0.16em", textTransform: "uppercase" }}>Meridian Marine Co.</p>
+          <h1 style={{ margin: "8px 0 6px", color: "var(--navy)", fontSize: 42, lineHeight: 1.05 }}>Operations</h1>
+          <p style={{ color: "var(--muted)" }}>The live operations data path is unavailable.</p>
+          <div style={{ background: "var(--white)", border: "1px solid var(--line)", borderRadius: 16, padding: 20, color: "var(--muted)" }}>
+            {error.message}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const openFindings = (findings ?? []).filter((finding) => !["resolved", "closed"].includes(finding.status)).length;
+  const overdueActions = (actions ?? []).filter((action) => action.due_at && new Date(action.due_at).getTime() < Date.now() && !["completed", "verified", "closed"].includes(action.status)).length;
+  const pendingReports = 0;
+
+  const queue = [
+    ...(visits ?? []).slice(0, 4).map((visit) => ({
+      title: (visit.vessels as { name?: string } | null)?.name ?? "Unnamed vessel",
+      detail: visit.scheduled_at ? `Visit · ${new Date(visit.scheduled_at).toLocaleString()}` : "Visit scheduled",
+      status: visit.status,
+      tone: "normal",
+    })),
+    ...(findings ?? []).filter((finding) => !["resolved", "closed"].includes(finding.status)).slice(0, 2).map((finding) => ({
+      title: (finding.vessels as { name?: string } | null)?.name ?? "Unnamed vessel",
+      detail: `Finding · ${finding.title}`,
+      status: finding.priority,
+      tone: finding.priority === "critical" ? "critical" : "urgent",
+    })),
+  ];
+
+  const stats = [
+    ["Today's visits", String((visits ?? []).filter((visit) => visit.scheduled_at && new Date(visit.scheduled_at).toDateString() === new Date().toDateString()).length)],
+    ["Open findings", String(openFindings)],
+    ["Overdue actions", String(overdueActions)],
+    ["Reports pending", String(pendingReports)],
+  ];
+
   return (
     <main style={{ minHeight: "100vh", padding: "32px 24px 64px" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
@@ -22,7 +61,7 @@ export default function OperationsPage() {
             <h1 style={{ margin: "8px 0 6px", color: "var(--navy)", fontSize: 42, lineHeight: 1.05 }}>Operations</h1>
             <p style={{ margin: 0, color: "var(--muted)" }}>What needs attention right now.</p>
           </div>
-          <div style={{ color: "var(--muted)", fontSize: 14 }}>Construction workspace · mock data</div>
+          <div style={{ color: "var(--muted)", fontSize: 14 }}>Live operational data</div>
         </header>
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
@@ -38,8 +77,10 @@ export default function OperationsPage() {
           <div style={{ padding: "20px 22px", borderBottom: "1px solid var(--line)" }}>
             <h2 style={{ margin: 0, color: "var(--navy)", fontSize: 20 }}>Priority queue</h2>
           </div>
-          {queue.map((item) => (
-            <div key={item.title} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "18px 22px", borderBottom: "1px solid var(--line)" }}>
+          {queue.length === 0 ? (
+            <div style={{ padding: 22, color: "var(--muted)" }}>No operational items require attention.</div>
+          ) : queue.map((item) => (
+            <div key={`${item.title}-${item.detail}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, padding: "18px 22px", borderBottom: "1px solid var(--line)" }}>
               <div>
                 <strong style={{ color: "var(--navy)" }}>{item.title}</strong>
                 <div style={{ marginTop: 4, color: "var(--muted)", fontSize: 14 }}>{item.detail}</div>
