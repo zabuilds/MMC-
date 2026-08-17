@@ -36,5 +36,8 @@ export const constructionQAReview: QAReview = {
 };
 
 export function canApproveReport(review: QAReview): boolean {
-  return review.items.filter((item) => item.required).every((item) => item.passed) && review.status !== "Fail";
+  const requiredItemsPassed = review.items.filter((item) => item.required).every((item) => item.passed);
+  const reviewCompleted = review.status === "Pass" || review.status === "Pass With Notes";
+
+  return requiredItemsPassed && reviewCompleted;
 }
